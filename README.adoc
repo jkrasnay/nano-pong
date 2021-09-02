@@ -1,0 +1,10 @@
+= Arduino Pong Game
+
+== Setup
+
+Install `arduino-cli` and the `u8g2` library.
+
+----
+brew install arduino-cli
+arduino-cli lib install u8g2
+----
