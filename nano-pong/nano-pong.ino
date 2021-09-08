@@ -14,6 +14,10 @@ const int paddle_vel = 6;
 
 const int score_h = 10;
 
+/** Buffer into which we can copy strings from PROGMEM */
+char buf[20];
+
+
 /**
  * Display driver. We need this at various points, so we just
  * initialize it first.
@@ -66,8 +70,8 @@ typedef enum {
 
 typedef struct {
     EventType event_type;  /** Type of event */
-    short subject;          /** Button that was pushed, timer that fired, or entity that collided. */
-    short object;           /** In a collision, the "other" entity. */
+    uint8_t subject;          /** Button that was pushed, timer that fired, or entity that collided. */
+    uint8_t object;           /** In a collision, the "other" entity. */
 } Event;
 
 const short EVENT_QUEUE_SIZE = 5;
@@ -92,7 +96,7 @@ void enqueue_event(EventType event_type, short subject, short object) {
  */
 
 typedef struct {
-    short pin;
+    uint8_t pin;
     boolean down;
 } Button;
 
@@ -177,10 +181,10 @@ void check_timers() {
 typedef struct {
     short x;
     short y;
-    short w;
-    short h;
-    short dx;
-    short dy;
+    uint8_t w;
+    uint8_t h;
+    int8_t dx;
+    int8_t dy;
 } Entity;
 
 typedef enum {
@@ -267,11 +271,12 @@ void update_paddle() {
  * Drawing utilities
  */
 
-void draw_center(int y, const char *s) {
-    int w = u8g2.getStrWidth(s);
+void draw_center(int y, const __FlashStringHelper *s) {
+    strcpy_P(buf, (char*) s);
+    int w = u8g2.getStrWidth(buf);
     int disp_w = u8g2.getDisplayWidth();
     int x = (disp_w - w) / 2;
-    u8g2.drawStr(x, y, s);
+    u8g2.drawStr(x, y, buf);
 }
 
 void draw_ball() {
@@ -284,8 +289,6 @@ void draw_paddle() {
     u8g2.drawRBox(p->x, p->y, p->w, p->h, 2);
 }
 
-char score_buffer[10];
-
 void draw_score() {
 
     u8g2_uint_t disp_h = u8g2.getDisplayHeight();
@@ -295,11 +298,11 @@ void draw_score() {
         u8g2.drawDisc(ball_radius + i * ball_radius * 2 + i * 2, disp_h - ball_radius - 1, ball_radius);
     }
 
-    sprintf(score_buffer, "%d", score);
-    //strcpy(score_buffer, "blah"); // testing
+    sprintf(buf, "%d", score);
+    //strcpy(buf, "blah"); // testing
     u8g2.setFont(u8g2_font_7x13_tr);
-    int w = u8g2.getStrWidth(score_buffer);
-    u8g2.drawStr(disp_w - w, disp_h, score_buffer);
+    int w = u8g2.getStrWidth(buf);
+    u8g2.drawStr(disp_w - w, disp_h, buf);
 }
 
 
@@ -310,19 +313,19 @@ void draw_score() {
 void draw_splash() {
 
     u8g2.setFont(u8g2_font_7x13_tr);
-    draw_center(20, "nano");
+    draw_center(20, F("nano"));
 
     u8g2.setFont(u8g2_font_michaelmouse_tu);
-    draw_center(35, "PONG");
+    draw_center(35, F("PONG"));
 
     u8g2.setFont(u8g2_font_6x12_tr);
-    draw_center(60, "Press A to begin");
+    draw_center(60, F("Press A to begin"));
 
 }
 
 void draw_ready() {
     u8g2.setFont(u8g2_font_7x13_tr);
-    draw_center(35, "Ready");
+    draw_center(35, F("Ready"));
     draw_ball();
     draw_paddle();
     draw_score();
@@ -330,7 +333,7 @@ void draw_ready() {
 
 void draw_set() {
     u8g2.setFont(u8g2_font_7x13_tr);
-    draw_center(35, "Set");
+    draw_center(35, F("Set"));
     draw_ball();
     draw_paddle();
     draw_score();
@@ -344,7 +347,7 @@ void draw_playing() {
 
 void draw_doh() {
     u8g2.setFont(u8g2_font_7x13_tr);
-    draw_center(35, "Doh!");
+    draw_center(35, F("Doh!"));
     draw_ball();
     draw_paddle();
     draw_score();
@@ -352,7 +355,7 @@ void draw_doh() {
 
 void draw_game_over() {
     u8g2.setFont(u8g2_font_7x13_tr);
-    draw_center(35, "Game Over");
+    draw_center(35, F("Game Over"));
     draw_ball();
     draw_paddle();
     draw_score();
@@ -513,5 +516,5 @@ void loop() {
     draw_state();
     u8g2.sendBuffer();
 
-    delay(16);
+    //delay(16);
 }
