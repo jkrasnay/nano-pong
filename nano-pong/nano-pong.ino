@@ -392,26 +392,6 @@ void draw_state() {
  * game state + event.
  */
 
-    // splash, button pushed A -> game_state = ready, timer = N
-    // ready, timeout -> game_state = get_set, timer = N
-    // get_set, timeout -> game_state = go, timer = N, set ball velocity
-    // go, timeout -> game_state = playing, timer = random bonus time
-    // playing, collision(ball, E_WALL_E) -> ball.dx = -ball.dx
-    // playing, collision(ball, E_WALL_W) -> ball.dx = -ball.dx
-    // playing, collision(ball, E_WALL_N) -> ball.dy = -ball.dy
-    // playing, collision(ball, E_PADDLE) -> ball.dy = -ball.dy, score += 10
-    // playing, collision(ball, E_WALL_S) -> if balls-- == 0 then game_state = game_over
-    //                                       else game_state = doh, timer = N
-    // doh, timeout -> game_state = ready, timer = N
-
-void print_event(short event_index) {
-    Serial.print(event_queue[event_index].event_type);
-    Serial.print(", ");
-    Serial.print(event_queue[event_index].subject);
-    Serial.print(", ");
-    Serial.println(event_queue[event_index].object);
-}
-
 boolean event_matches(short event_index, GameState gs, EventType event_type, short subject, short object) {
     Event *p = &event_queue[event_index];
     return gs == game_state
@@ -478,11 +458,6 @@ void handle_event(short event_index) {
 
 void handle_events() {
     for (short i = 0; i < event_count; i++) {
-        //Serial.println(event_queue[i].event_type);
-        //print_event(i);
-        //if (event_queue[i].event_type == EV_BUTTON_DOWN && event_queue[i].subject == BUTTON_B) {
-        //    set_timer(0, 1000);
-        //}
         handle_event(i);
     }
     event_count = 0;
@@ -498,7 +473,6 @@ void setup() {
     u8g2.begin();
     setup_buttons();
     setup_entities();
-    //Serial.begin(9600);
 }
 
 void loop() {
@@ -516,5 +490,4 @@ void loop() {
     draw_state();
     u8g2.sendBuffer();
 
-    //delay(16);
 }
